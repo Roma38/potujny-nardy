@@ -28,7 +28,7 @@ export function useGame() {
 
   useEffect(() => {
     if ((dice.length && !isHaveValidMoves())) {
-      alert(`You has no moves: ${dice.toString()}`)
+      alert(`You has no moves: ${dice.toString()}`);
       endTurn();
     }
     ;
@@ -94,7 +94,7 @@ export function useGame() {
     if (selectedPoint === null || !newBoard[selectedPoint]) {
       throw new Error("No checkers in selected point");
     }
-    if (isOponentsBlotThere(to)) {
+    if (isOpponentsBlotThere(to)) {
       const newBar = structuredClone(bar);
       setBar(hitBlot(newBoard, newBar, to).barClone);
     }
@@ -118,7 +118,7 @@ export function useGame() {
     // }
   }
 
-  function isOponentsBlotThere(point:number): boolean {
+  function isOpponentsBlotThere(point:number): boolean {
      return board[point][0] && board[point][0].color !== currentPlayer ? true : false;
   }
 
@@ -135,12 +135,13 @@ export function useGame() {
   function reEnterChecker(to: number): void {
     const newBoard = structuredClone(board);
     const newBar = structuredClone(bar);
-    if (isOponentsBlotThere(to)) {
+    if (isOpponentsBlotThere(to)) {
       hitBlot(newBoard, newBar, to);
     }
     newBoard[to].push(newBar[currentPlayer].pop()!); //move checker
     setBoard(newBoard);
     setBar(newBar);
+    setSelectedPoint(null);
     removeDie(currentPlayer === 'black' ? to + 1 : 24 - to);
   }
   
@@ -172,13 +173,88 @@ export function useGame() {
       ) return true;
     }
 
+    if (isBearingOffAllowed()) {
+      if (isHasExplicitBearOff()) return true;
+
+      const farestBearOffPoint = currentPlayer === 'white'
+        ? board.findIndex(point => point[0] && point[0].color === currentPlayer) + 1
+        : 24 - board.findLastIndex(point => point[0] && point[0].color === currentPlayer);
+      //if some die bigger than farest checker at home
+      if (dice.some((die) => die > farestBearOffPoint)) return true;
+    }
+
+    return false;
+  }
+
+  function isBearingOffAllowed() {
+    const homePositions = currentPlayer === 'white' 
+      ? board.slice(0, 6)
+      : board.slice(18);
+    const checkersAtHome = homePositions.flat().filter(({ color }) => color === currentPlayer);
+
+    return checkersAtHome.length + borneOff[currentPlayer].length === 15;
+  }
+
+  function isBearOffValid(): boolean {
+    if (selectedPoint === null) return false;
+
+    const bearOffPoint = currentPlayer === "white" ? selectedPoint + 1 : 24 - selectedPoint;
+    //if checker exactly on the bear off position
+    if (dice.includes(bearOffPoint)) {
+      removeDie(bearOffPoint);
+
+      return true
+    };
+
+    const prevHomePoints =
+      currentPlayer === "white"
+        ? board.slice(selectedPoint + 1, 6)
+        : board.slice(18, selectedPoint);
+    const isFarestChecker = !prevHomePoints
+      .flat()
+      .some(({ color }) => color === currentPlayer);
+    //if some die bigger then position, and if it's farest checker
+    if (dice.some((die) => die > bearOffPoint) && isFarestChecker){
+      removeDie(Math.max(...dice)); //remove biggest die
+
+      return true;
+    }
+
+    return false;
+  }
+
+  function bearOff() {
+    if (selectedPoint === null) return;
+    if (!isBearingOffAllowed() || !isBearOffValid()) {
+      return setSelectedPoint(null);
+    }
+
+    const newBoard = structuredClone(board);
+    const newBorneOff = structuredClone(borneOff);
+    const checker = newBoard[selectedPoint].pop()!;
+    newBorneOff[checker.color].push(checker); //bear off checker
+    setBoard(newBoard);
+    setBorneOff(newBorneOff);
+    setSelectedPoint(null);
+  }
+
+  function isHasExplicitBearOff(): boolean {
+    for (let i = 0; i < 6; i++) { //loop through home points
+      const point = currentPlayer === 'white' ? i : 23 - i;
+      //if no players checkers at the point
+      if(!board[point][0] ||  board[point][0].color !== currentPlayer) continue;
+      //if checker can be moved exactly to born off
+      if (currentPlayer === "white") return dice.some(die => point - die === -1);
+      if (currentPlayer === "black") return dice.some(die => point + die === 24);
+    }
     return false;
   }
 
   return {
-    state: { board, currentPlayer, dice , selectedPoint, bar, borneOff},
+    state: { board, currentPlayer, dice, selectedPoint, bar, borneOff },
     rollDice,
     endTurn,
     onPointClick,
+    bearOff,
   };
 }
