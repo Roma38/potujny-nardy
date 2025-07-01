@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { initialBoard } from "../lib/initialState";
+import { initialBoard } from "@/lib/initialState";
+import { CHECKERS_AMOUNT } from "@/lib/constants";
 
 export type Player = "white" | "black";
 
@@ -16,6 +17,7 @@ export type GameState = {
   selectedPoint: number | null;
   bar: { white: Checker[]; black: Checker[] };
   borneOff: { white: Checker[]; black: Checker[] };
+  score: { white: number; black: number; };
 };
 
 export function useGame() {
@@ -25,14 +27,22 @@ export function useGame() {
   const [selectedPoint, setSelectedPoint] = useState<GameState['selectedPoint']>(null);
   const [bar, setBar] = useState<GameState["bar"]>({ white: [], black: [] });
   const [borneOff, setBorneOff] = useState<GameState["borneOff"]>({white: [],black: [],});
+  const [score, setScore] = useState<GameState['score']>({ white: 0, black: 0 });
 
   useEffect(() => {
-    if ((dice.length && !isHaveValidMoves())) {
+    if (dice.length && !isHaveValidMoves()) {
       alert(`You has no moves: ${dice.toString()}`);
       endTurn();
     }
-    ;
-  }, [board, dice])
+  }, [board, dice]);
+
+  useEffect(() => {
+    for (const player in borneOff) {
+      if (borneOff[player as Player].length === CHECKERS_AMOUNT) {
+        gameOver(player as Player);
+      }
+    }
+  }, [borneOff]);
 
   function rollDice() {
     const d1 = Math.ceil(Math.random() * 6);
@@ -253,8 +263,41 @@ export function useGame() {
     return false;
   }
 
+  function gameOver(winner: Player) {
+    const loser: Player = winner === "white" ? "black" : "white";
+    let points: number;
+    
+    const whiteHome = board.slice(0, 6);
+    const blackHome = board.slice(18, 24);
+    const [winnerHome, loserHome] = winner === "white" 
+      ? [whiteHome, blackHome] 
+      : [blackHome, whiteHome];
+    
+    if (borneOff[loser].length) { //single game
+      points = 2;
+    } else if (winnerHome.flat().some(({ color }) => color === loser)) {  //backgammon
+      points = 3;
+    } else if ( //gammon in home board
+      !borneOff[loser].length &&
+      loserHome.flat().length === CHECKERS_AMOUNT
+    ) {
+      points = 4;
+    } else {  //gammon
+      points = 2;
+    }
+    alert(`${winner} wins with ${points} ${points === 1 ? "point" : "points"}`);
+    
+    setScore({ ...score, [winner]: score[winner] + points });
+    setCurrentPlayer(winner);
+    setSelectedPoint(null);
+    setDice([]);
+    setBoard(initialBoard);
+    setBar({ white: [], black: [] });
+    setBorneOff({ white: [], black: [] });
+  }
+
   return {
-    state: { board, currentPlayer, dice, selectedPoint, bar, borneOff },
+    state: { board, currentPlayer, dice, selectedPoint, bar, borneOff, score },
     rollDice,
     endTurn,
     onPointClick,
