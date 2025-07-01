@@ -31,7 +31,7 @@ export function useGame() {
 
   useEffect(() => {
     if (dice.length && !isHaveValidMoves()) {
-      alert(`You has no moves: ${dice.toString()}`);
+      alert(`You have no moves: ${dice.toString()}`);
       endTurn();
     }
   }, [board, dice]);
