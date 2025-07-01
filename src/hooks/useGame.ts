@@ -176,9 +176,9 @@ export function useGame() {
     if (isBearingOffAllowed()) {
       if (isHasExplicitBearOff()) return true;
 
-      const farestBearOffPoint = currentPlayer === 'white'
-        ? board.findIndex(point => point[0] && point[0].color === currentPlayer) + 1
-        : 24 - board.findLastIndex(point => point[0] && point[0].color === currentPlayer);
+      const farestBearOffPoint = currentPlayer === "white"
+        ? board.findLastIndex((point) => point[0] && point[0].color === currentPlayer) + 1
+        : 24 - board.findIndex((point) => point[0] && point[0].color === currentPlayer);
       //if some die bigger than farest checker at home
       if (dice.some((die) => die > farestBearOffPoint)) return true;
     }
@@ -192,7 +192,7 @@ export function useGame() {
       : board.slice(18);
     const checkersAtHome = homePositions.flat().filter(({ color }) => color === currentPlayer);
 
-    return checkersAtHome.length + borneOff[currentPlayer].length === 15;
+    return checkersAtHome.length + borneOff[currentPlayer].length === CHECKERS_AMOUNT;
   }
 
   function isBearOffValid(): boolean {
@@ -244,8 +244,11 @@ export function useGame() {
       //if no players checkers at the point
       if(!board[point][0] ||  board[point][0].color !== currentPlayer) continue;
       //if checker can be moved exactly to born off
-      if (currentPlayer === "white") return dice.some(die => point - die === -1);
-      if (currentPlayer === "black") return dice.some(die => point + die === 24);
+      const callBack = currentPlayer === "white" 
+        ? (die: number) => point - die === -1
+        : (die: number) => point + die === 24;
+
+      if (dice.some(callBack)) return true;
     }
     return false;
   }
