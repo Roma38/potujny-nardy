@@ -1,38 +1,27 @@
 "use client";
 
-import Board from "../components/Board";
-import Dice from "../components/Dice";
-import Bar from "../components/Bar";
-import BorneOff from "../components/BorneOff";
-import Score from "@/components/Score";
-import { useGame } from "../hooks/useGame";
+import { redirect } from 'next/navigation'
+import { useEffect } from "react";
+import socket, { joinRoom } from "@/lib/socket";
 
-export default function Home() {
-  const { state, onPointClick, rollDice, bearOff } = useGame();
+export default function Page() {
+  useEffect(() => {
+    const roomId = "room-123";
+    joinRoom(roomId);
 
-  return (
-    <main className="min-h-screen bg-green-900 text-white flex flex-col items-center justify-center">
-      <h1 className="text-3xl font-bold mb-6">Potujny Nardy</h1>
+    socket.on("connect", () => {
+      console.log("✅ Connected:", socket.id);
+    });
 
-      <div className="flex justify-between w-full">
-        <Score player="white" score={state.score} />
+    socket.on("joined", (roomId) => {
+      console.log("🧑‍🤝‍🧑", `Player joined /${roomId}`); // "Player joined room-123"
+      redirect(`/room/${roomId}`);
+    });
 
-        <div className="grow">
-          <h2 className="text-xl font-bold capitalize text-center">{state.currentPlayer}</h2>
-          <Bar bar={state.bar} />
-          <BorneOff borneOff={state.borneOff} bearOff={bearOff} />
-        </div>
+    return () => {
+      socket.off();
+    };
+  }, []);
 
-        <Score player="black" score={state.score} />
-      </div>
-
-      <Board
-        board={state.board}
-        selectedPoint={state.selectedPoint}
-        onPointClick={onPointClick}
-      />
-
-      <Dice dice={state.dice} onRoll={rollDice} />
-    </main>
-  );
+  return <div className="text-white grow">Joined game room</div>;
 }

@@ -13,7 +13,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="w-full bg-green-900 flex items-center justify-center">
-        {children}
+        <main className="min-h-screen bg-green-900 text-white flex flex-col items-center justify-center">
+          <h1 className="text-3xl font-bold mb-6">Potujny Nardy</h1>
+          {children}
+        </main>
       </body>
     </html>
   );
