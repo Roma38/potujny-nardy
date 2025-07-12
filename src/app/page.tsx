@@ -1,21 +1,27 @@
 "use client";
 
-import { redirect } from 'next/navigation'
 import { useEffect } from "react";
-import socket, { joinRoom } from "@/lib/socket";
+import { useRouter } from "next/navigation";
+import socket from "@/lib/socket";
+import { DEFAULT_ROOM_ID } from '@/lib/constants';
 
 export default function Page() {
-  useEffect(() => {
-    const roomId = "room-123";
-    joinRoom(roomId);
+  const router = useRouter();
 
+  useEffect(() => {
+    if (!socket.connected) {
+      socket.connect();
+      socket.once("connect", () => {
+        socket.emit("join", DEFAULT_ROOM_ID);
+        router.push(`/room/${DEFAULT_ROOM_ID}`);
+      });
+    } else {
+      socket.emit("join", DEFAULT_ROOM_ID);
+      router.push(`/room/${DEFAULT_ROOM_ID}`);
+    }
+    
     socket.on("connect", () => {
       console.log("✅ Connected:", socket.id);
-    });
-
-    socket.on("joined", (roomId) => {
-      console.log("🧑‍🤝‍🧑", `Player joined /${roomId}`); // "Player joined room-123"
-      redirect(`/room/${roomId}`);
     });
 
     return () => {
