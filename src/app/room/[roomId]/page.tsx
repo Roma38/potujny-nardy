@@ -9,12 +9,12 @@ import BorneOff from "@/components/BorneOff";
 import Score from "@/components/Score";
 import { useGame } from "@/hooks/useGame";
 import socket from "@/lib/socket";
-import { Room } from "@/lib/types";
+import { Room, RoomState } from "@/lib/types";
 
 export default function GameRoom() {
   const [roomUsers, setRoomUsers] = useState <string[]>([]);
-  const { state, onPointClick, rollDice, bearOff, resetState } = useGame();
-  const { roomId } = useParams()!;
+  const { state, onPointClick, rollDice, bearOff, resetState, setDice } = useGame();
+  const { roomId }: { roomId: string } = useParams()!;
   
   useEffect(() => {
     socket.emit("get room", roomId, (room: Room) => {
@@ -26,17 +26,22 @@ export default function GameRoom() {
     socket.on("room update", (room) => {
       setRoomUsers(room);
     })
-    
+
+    socket.on("dice update", (dice: RoomState["dice"]) => {
+      setDice(dice);
+    })
+
     return () => {
       socket.off();
     };
   }, [])
 
-  const [white, black, ...visitors] = roomUsers;
+  const [white, black, ...audience] = roomUsers;
   const playerColor = white === socket.id ? 'white' 
     : black === socket.id ? 'black' : null;
   const isUsersTurn = playerColor === state.currentPlayer;
-  console.log({ playerColor, isUsersTurn, visitors })
+  console.log({ playerColor, isUsersTurn, audience })
+  
   return (
     <div className={`grow ${isUsersTurn ? "" : "pointer-events-none"}`}>
       <div className="flex justify-between w-full">
@@ -57,7 +62,7 @@ export default function GameRoom() {
         onPointClick={onPointClick}
       />
 
-      <Dice dice={state.dice} onRoll={rollDice} />
+      <Dice dice={state.dice} onRoll={() => rollDice(roomId)} />
     </div>
   );
 }

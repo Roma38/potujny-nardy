@@ -6,6 +6,7 @@ import type { Server as IOServer } from "socket.io";
 import type { NextApiResponse } from "next";
 import { rooms } from "./dataBase";
 import { initialState } from "@/lib/initialState";
+import { RoomState } from "@/lib/types";
 
 export type NextApiResponseServerIO = NextApiResponse & {
   socket: {
@@ -63,6 +64,15 @@ export default function handler(
       socket.on("get room", (roomId: string, callback) => {
         const room = rooms[roomId] || [];
         callback(room);
+      });
+
+      socket.on("roll dice", (roomId) => {
+        const d1 = Math.ceil(Math.random() * 6);
+        const d2 = Math.ceil(Math.random() * 6);
+        const dice: RoomState["dice"] = d1 === d2 ? [d1, d1, d1, d1] : [d1, d2];
+
+        rooms[roomId].state.dice = dice;
+        io.to(roomId).emit("dice update", dice);
       });
 
       socket.on("disconnect", () => {

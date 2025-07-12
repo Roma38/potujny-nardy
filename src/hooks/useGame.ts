@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { initialBoard } from "@/lib/initialState";
 import { CHECKERS_AMOUNT } from "@/lib/constants";
 import { Board, Checker, Player, RoomState } from "@/lib/types";
+import socket from "@/lib/socket";
 
 export function useGame() {
   const [board, setBoard] = useState<Board>(initialBoard);
@@ -29,12 +30,9 @@ export function useGame() {
     }
   }, [borneOff]);
 
-  function rollDice() {
-    const d1 = Math.ceil(Math.random() * 6);
-    const d2 = Math.ceil(Math.random() * 6);
-    const result = d1 === d2 ? [d1, d1, d1, d1] : [d1, d2];
-
-    setDice(result);
+  function rollDice(roomId: string) {
+    socket.emit("roll dice", roomId);
+    
     // set bar as selected point
     if (bar[currentPlayer].length) {
       setSelectedPoint(currentPlayer === "white" ? 24 : -1);
@@ -297,6 +295,7 @@ export function useGame() {
     endTurn,
     onPointClick,
     bearOff,
+    setDice,
     resetState,
   };
 }
