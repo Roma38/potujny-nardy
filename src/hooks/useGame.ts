@@ -3,31 +3,16 @@
 import { useEffect, useState } from "react";
 import { initialBoard } from "@/lib/initialState";
 import { CHECKERS_AMOUNT } from "@/lib/constants";
-
-export type Player = "white" | "black";
-
-export type Checker = {
-  color: Player;
-};
-
-export type GameState = {
-  board: Checker[][];
-  currentPlayer: Player;
-  dice: number[];
-  selectedPoint: number | null;
-  bar: { white: Checker[]; black: Checker[] };
-  borneOff: { white: Checker[]; black: Checker[] };
-  score: { white: number; black: number; };
-};
+import { Board, Checker, Player, RoomState } from "@/lib/types";
 
 export function useGame() {
-  const [board, setBoard] = useState<GameState['board']>(initialBoard);
-  const [currentPlayer, setCurrentPlayer] = useState<GameState['currentPlayer']>('white');
-  const [dice, setDice] = useState<GameState['dice']>([]);
-  const [selectedPoint, setSelectedPoint] = useState<GameState['selectedPoint']>(null);
-  const [bar, setBar] = useState<GameState["bar"]>({ white: [], black: [] });
-  const [borneOff, setBorneOff] = useState<GameState["borneOff"]>({white: [],black: [],});
-  const [score, setScore] = useState<GameState['score']>({ white: 0, black: 0 });
+  const [board, setBoard] = useState<Board>(initialBoard);
+  const [currentPlayer, setCurrentPlayer] = useState<Player>('white');
+  const [dice, setDice] = useState<RoomState["dice"]>([]);
+  const [selectedPoint, setSelectedPoint] = useState<number | null>(null);
+  const [bar, setBar] = useState<RoomState["bar"]>({ white: [], black: [] });
+  const [borneOff, setBorneOff] = useState<RoomState["borneOff"]>({white: [],black: [],});
+  const [score, setScore] = useState<RoomState['score']>({ white: 0, black: 0 });
 
   useEffect(() => {
     if (dice.length && !isHaveValidMoves()) {
@@ -87,7 +72,7 @@ export function useGame() {
     return secondChecker && secondChecker.color !== currentPlayer;
   }
   
-  function isMoveValid(from: GameState['selectedPoint'], to: number): boolean {
+  function isMoveValid(from: number | null, to: number): boolean {
     if (
       from === null ||
       !dice.includes(currentPlayer === "white" ? from - to : to - from) ||
@@ -115,7 +100,7 @@ export function useGame() {
   }
 
   //hit the blot if it's there
-  function hitBlot(boardClone: GameState['board'], barClone: GameState['bar'], point: number) {
+  function hitBlot(boardClone: Board, barClone: RoomState['bar'], point: number) {
     // if (boardClone[point][0] && boardClone[point][0].color !== currentPlayer) {
       const checker = boardClone[point].pop();
       if (!checker) {
@@ -296,11 +281,22 @@ export function useGame() {
     setBorneOff({ white: [], black: [] });
   }
 
+  function resetState(state: RoomState) {
+    setBoard(state.board);
+    setCurrentPlayer(state.currentPlayer);
+    setDice(state.dice);
+    setSelectedPoint(null);
+    setBar(state.bar);
+    setBorneOff(state.borneOff);
+    setScore(state.score);
+  }
+
   return {
     state: { board, currentPlayer, dice, selectedPoint, bar, borneOff, score },
     rollDice,
     endTurn,
     onPointClick,
     bearOff,
+    resetState,
   };
 }

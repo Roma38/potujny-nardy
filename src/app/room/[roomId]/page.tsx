@@ -9,16 +9,18 @@ import BorneOff from "@/components/BorneOff";
 import Score from "@/components/Score";
 import { useGame } from "@/hooks/useGame";
 import socket from "@/lib/socket";
+import { Room } from "@/lib/types";
 
-export default function Room() {
+export default function GameRoom() {
   const [roomUsers, setRoomUsers] = useState <string[]>([]);
-  const { state, onPointClick, rollDice, bearOff } = useGame();
+  const { state, onPointClick, rollDice, bearOff, resetState } = useGame();
   const { roomId } = useParams()!;
   
   useEffect(() => {
-    socket.emit("get room", roomId, (room: string[]) => {
+    socket.emit("get room", roomId, (room: Room) => {
       console.log({ room });
-      setRoomUsers(room);
+      setRoomUsers(room.visitors);
+      resetState(room.state);
     });
 
     socket.on("room update", (room) => {

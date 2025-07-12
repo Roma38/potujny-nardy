@@ -5,6 +5,7 @@ import type { Socket } from "socket.io";
 import type { Server as IOServer } from "socket.io";
 import type { NextApiResponse } from "next";
 import { rooms } from "./dataBase";
+import { initialState } from "@/lib/initialState";
 
 export type NextApiResponseServerIO = NextApiResponse & {
   socket: {
@@ -44,20 +45,19 @@ export default function handler(
         socket.join(roomId);
         let room = rooms[roomId];
         if (!room) {
-          rooms[roomId] = []; // create room
+          rooms[roomId] = {visitors: [], state: initialState}; // create room
           room = rooms[roomId];
         };  
 
-        if (!room[0]) {
-          room[0] = socket.id; // set first player
-        } else if (!room[1]) {
-          room[1] = socket.id;  // set second player
+        if (!room.visitors[0]) {
+          room.visitors[0] = socket.id; // set first player
+        } else if (!room.visitors[1]) {
+          room.visitors[1] = socket.id; // set second player
         } else {
-          room.push(socket.id); // set visitor
+          room.visitors.push(socket.id); // set visitor
         };
-        console.log(rooms);
         console.log(`Socket ${socket.id} joined ${roomId}`);
-        io.to(roomId).emit("room update", room);
+        io.to(roomId).emit("room update", room.visitors);
       });
 
       socket.on("get room", (roomId: string, callback) => {
@@ -67,12 +67,12 @@ export default function handler(
 
       socket.on("disconnect", () => {
         Object.entries(rooms).forEach(([roomId, room]) => {
-          const index = room.indexOf(socket.id);
+          const index = room.visitors.indexOf(socket.id);
           
           if (index !== -1) {
-            delete room[index];
+            delete room.visitors[index];
             console.log(`Socket ${socket.id} left ${roomId}`);
-            io.to(roomId).emit("room update", room);
+            io.to(roomId).emit("room update", room.visitors);
           };
         })
         console.log("❌ Socket disconnected:", socket.id);
