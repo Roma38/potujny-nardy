@@ -20,16 +20,14 @@ export default function GameRoom() {
     socket.emit("get room", roomId, (room: Room) => {
       console.log({ room });
       setRoomUsers(room.visitors);
-      resetState(room.state);
+      resetState({ ...room.state, selectedPoint: null });
     });
 
     socket.on("room update", (room) => {
       setRoomUsers(room);
     })
 
-    socket.on("dice update", (dice: RoomState["dice"]) => {
-      setDice(dice);
-    })
+    socket.on("dice update", (dice: RoomState["dice"]) => setDice(dice));
 
     return () => {
       socket.off();

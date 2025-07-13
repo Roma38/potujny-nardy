@@ -1,41 +1,39 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { initialBoard } from "@/lib/initialState";
+import { useEffect, useReducer } from "react";
+import { initialState } from "@/lib/initialState";
 import { CHECKERS_AMOUNT } from "@/lib/constants";
-import { Board, Checker, Player, RoomState } from "@/lib/types";
+import { Checker, Player } from "@/lib/types";
 import socket from "@/lib/socket";
+import { gameReducer, GameState } from "@/state/reducer";
 
 export function useGame() {
-  const [board, setBoard] = useState<Board>(initialBoard);
-  const [currentPlayer, setCurrentPlayer] = useState<Player>('white');
-  const [dice, setDice] = useState<RoomState["dice"]>([]);
-  const [selectedPoint, setSelectedPoint] = useState<number | null>(null);
-  const [bar, setBar] = useState<RoomState["bar"]>({ white: [], black: [] });
-  const [borneOff, setBorneOff] = useState<RoomState["borneOff"]>({white: [],black: [],});
-  const [score, setScore] = useState<RoomState['score']>({ white: 0, black: 0 });
-
+  const [state, dispatch] = useReducer(gameReducer, {...initialState, selectedPoint: null});
+  
   useEffect(() => {
-    if (dice.length && !isHaveValidMoves()) {
-      alert(`You have no moves: ${dice.toString()}`);
-      endTurn();
+    if (state.dice.length && !isHaveValidMoves()) {
+      alert(`You have no moves: ${state.dice.toString()}`);
+      dispatch({ type: "END_TURN" });
     }
-  }, [board, dice]);
+  }, [state.board, state.dice]);
 
   useEffect(() => {
-    for (const player in borneOff) {
-      if (borneOff[player as Player].length === CHECKERS_AMOUNT) {
+    for (const player in state.borneOff) {
+      if (state.borneOff[player as Player].length === CHECKERS_AMOUNT) {
         gameOver(player as Player);
       }
     }
-  }, [borneOff]);
+  }, [state.borneOff]);
+
+  const { board, currentPlayer, dice, selectedPoint, bar, borneOff } = state;
 
   function rollDice(roomId: string) {
     socket.emit("roll dice", roomId);
-    
-    // set bar as selected point
+
     if (bar[currentPlayer].length) {
-      setSelectedPoint(currentPlayer === "white" ? 24 : -1);
+      // set bar as selected point
+      const point = currentPlayer === "white" ? 24 : -1
+      dispatch({ type: "SELECT_POINT", point });
     }
   }
 
@@ -44,25 +42,27 @@ export function useGame() {
     if (bar[currentPlayer].length) {
       if (isMoveValid(currentPlayer === 'white' ? 24 : -1, index)) {
         //re-enter a checker from the bar
-        reEnterChecker(index);
+        dispatch({
+          type: "RE_ENTER_CHECKER",
+          color: currentPlayer,
+          point: index,
+          isHitBlot: isOpponentsBlotThere(index),
+        });
       }
       return;
     }
     //unselect a point
     if (selectedPoint === index || isPointClosed(index)) {
-      return setSelectedPoint(null);
+      return dispatch({ type: "SELECT_POINT", point: null });
     }
-    // if (selectedPoint === null) {
-    //   return setSelectedPoint(index);
-    // }
     if (isMoveValid(selectedPoint,index)) {
       return moveChecker(index);
     }
     if (!board[index][0] || board[index][0].color !== currentPlayer) {
-      return setSelectedPoint(null);
+      return dispatch({ type: "SELECT_POINT", point: null });
     }
     //select a point
-    return setSelectedPoint(index);
+    return dispatch({ type: "SELECT_POINT", point: index });
   }
 
   function isPointClosed(index: number):boolean {
@@ -83,66 +83,20 @@ export function useGame() {
   }
 
   function moveChecker(to: number): void {
-    const newBoard = structuredClone(board);
-    if (selectedPoint === null || !newBoard[selectedPoint]) {
-      throw new Error("No checkers in selected point");
+    if (selectedPoint === null) {
+      throw new Error("No selectedPoint");
     }
-    if (isOpponentsBlotThere(to)) {
-      const newBar = structuredClone(bar);
-      setBar(hitBlot(newBoard, newBar, to).barClone);
-    }
-    newBoard[to].push(newBoard[selectedPoint].pop()!);  //move checker
-    setBoard(newBoard);
-    removeDie(Math.abs(selectedPoint - to));
-    setSelectedPoint(null);
-  }
-
-  //hit the blot if it's there
-  function hitBlot(boardClone: Board, barClone: RoomState['bar'], point: number) {
-    // if (boardClone[point][0] && boardClone[point][0].color !== currentPlayer) {
-      const checker = boardClone[point].pop();
-      if (!checker) {
-        throw new Error("No checkers in selected point");
-      }
-      // setBar({ ...bar, [checker.color]: [...bar[checker.color], checker] });
-      barClone[checker.color].push(checker);
-
-      return { boardClone, barClone };
-    // }
+    
+    dispatch({
+      type: "MOVE_CHECKER",
+      from: selectedPoint,
+      to,
+      isHitBlot: isOpponentsBlotThere(to),
+    });
   }
 
   function isOpponentsBlotThere(point:number): boolean {
      return board[point][0] && board[point][0].color !== currentPlayer ? true : false;
-  }
-
-  function removeDie(value:number) {
-    const newDice = [...dice];
-    newDice.splice(newDice.indexOf(value), 1);
-    setDice(newDice);
-
-    if (!newDice.length) {
-      endTurn();
-    }
-  }
-
-  function reEnterChecker(to: number): void {
-    const newBoard = structuredClone(board);
-    const newBar = structuredClone(bar);
-    if (isOpponentsBlotThere(to)) {
-      hitBlot(newBoard, newBar, to);
-    }
-    newBoard[to].push(newBar[currentPlayer].pop()!); //move checker
-    setBoard(newBoard);
-    setBar(newBar);
-    setSelectedPoint(null);
-    removeDie(currentPlayer === 'black' ? to + 1 : 24 - to);
-  }
-  
-
-  function endTurn() {
-    setCurrentPlayer(currentPlayer === 'white' ? 'black' : 'white');
-    setSelectedPoint(null);
-    setDice([]);
   }
 
   function isHaveValidMoves(): boolean {
@@ -188,47 +142,48 @@ export function useGame() {
     return checkersAtHome.length + borneOff[currentPlayer].length === CHECKERS_AMOUNT;
   }
 
-  function isBearOffValid(): boolean {
-    if (selectedPoint === null) return false;
-
-    const bearOffPoint = currentPlayer === "white" ? selectedPoint + 1 : 24 - selectedPoint;
-    //if checker exactly on the bear off position
-    if (dice.includes(bearOffPoint)) {
-      removeDie(bearOffPoint);
-
-      return true
-    };
-
-    const prevHomePoints =
-      currentPlayer === "white"
-        ? board.slice(selectedPoint + 1, 6)
-        : board.slice(18, selectedPoint);
-    const isFarestChecker = !prevHomePoints
-      .flat()
-      .some(({ color }) => color === currentPlayer);
-    //if some die bigger then position, and if it's farest checker
-    if (dice.some((die) => die > bearOffPoint) && isFarestChecker){
-      removeDie(Math.max(...dice)); //remove biggest die
-
-      return true;
-    }
-
-    return false;
-  }
-
   function bearOff() {
     if (selectedPoint === null) return;
-    if (!isBearingOffAllowed() || !isBearOffValid()) {
-      return setSelectedPoint(null);
+    if (!isBearingOffAllowed()) {
+      return dispatch({ type: "SELECT_POINT", point: null });
+    }
+    const exactDie = currentPlayer === "white" 
+      ? selectedPoint + 1 
+      : 24 - selectedPoint;
+
+    if (dice.indexOf(exactDie) !== -1) {
+      return dispatch({
+        type: "BEAR_OFF",
+        point: selectedPoint,
+        color: currentPlayer,
+        dieIndex: exactDie,
+      });
     }
 
-    const newBoard = structuredClone(board);
-    const newBorneOff = structuredClone(borneOff);
-    const checker = newBoard[selectedPoint].pop()!;
-    newBorneOff[checker.color].push(checker); //bear off checker
-    setBoard(newBoard);
-    setBorneOff(newBorneOff);
-    setSelectedPoint(null);
+    const prevHomePoints = currentPlayer === "white"
+      ? board.slice(selectedPoint + 1, 6)
+      : board.slice(18, selectedPoint);
+    const isFarthestChecker = !prevHomePoints
+      .flat()
+      .some(({ color }) => color === currentPlayer);
+
+    if (!isFarthestChecker) { // if it's not the farthest checker in home
+      return dispatch({ type: "SELECT_POINT", point: null });
+    }
+
+    const biggerThanExactDieIndex = dice.findIndex((die) => die > exactDie);
+
+    if (biggerThanExactDieIndex !== -1) {
+      // if there are a die bigger than exact bear off die
+      return dispatch({
+        type: "BEAR_OFF",
+        point: selectedPoint,
+        color: currentPlayer,
+        dieIndex: biggerThanExactDieIndex,
+      });
+    } 
+    
+    return dispatch({ type: "SELECT_POINT", point: null });
   }
 
   function isHasExplicitBearOff(): boolean {
@@ -243,6 +198,7 @@ export function useGame() {
 
       if (dice.some(callBack)) return true;
     }
+
     return false;
   }
 
@@ -257,7 +213,7 @@ export function useGame() {
       : [blackHome, whiteHome];
     
     if (borneOff[loser].length) { //single game
-      points = 2;
+      points = 1;
     } else if (winnerHome.flat().some(({ color }) => color === loser)) {  //backgammon
       points = 3;
     } else if ( //gammon in home board
@@ -269,33 +225,17 @@ export function useGame() {
       points = 2;
     }
     alert(`${winner} wins with ${points} ${points === 1 ? "point" : "points"}`);
-    
-    setScore({ ...score, [winner]: score[winner] + points });
-    setCurrentPlayer(winner);
-    setSelectedPoint(null);
-    setDice([]);
-    setBoard(initialBoard);
-    setBar({ white: [], black: [] });
-    setBorneOff({ white: [], black: [] });
-  }
 
-  function resetState(state: RoomState) {
-    setBoard(state.board);
-    setCurrentPlayer(state.currentPlayer);
-    setDice(state.dice);
-    setSelectedPoint(null);
-    setBar(state.bar);
-    setBorneOff(state.borneOff);
-    setScore(state.score);
+    dispatch({ type: "GAME_OVER", winner, points });
   }
 
   return {
-    state: { board, currentPlayer, dice, selectedPoint, bar, borneOff, score },
+    state,
     rollDice,
-    endTurn,
+    endTurn: () => dispatch({ type: "END_TURN" }),
     onPointClick,
     bearOff,
-    setDice,
-    resetState,
+    setDice: (dice: number[]) => dispatch({ type: "ROLL_DICE", dice }),
+    resetState: (state: GameState) => dispatch({ type: "RESET_STATE", state }),
   };
 }
