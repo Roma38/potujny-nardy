@@ -29,10 +29,12 @@ export default function GameRoom() {
 
     return () => {
       socket.off();
+      socket.emit("leave", roomId);
     };
   }, [])
 
-  const [white, black, ...audience] = roomUsers;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [white, black, ...spectators] = roomUsers;
   const playerColor = white === socket.id ? 'white' 
     : black === socket.id ? 'black' : null;
   const isUsersTurn = playerColor === state.currentPlayer;

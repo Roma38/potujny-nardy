@@ -1,6 +1,6 @@
 "use client";
 
-import { Checker } from "../hooks/useGame";
+import { Checker } from "@/lib/types";
 
 type Props = {
   bar: { white: Checker[]; black: Checker[] };

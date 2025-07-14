@@ -16,7 +16,6 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       return { ...state, selectedPoint: action.point };
 
     case "UPDATE_STATE":
-      console.log(action)
       return { ...state, ...action.state };
 
     default:

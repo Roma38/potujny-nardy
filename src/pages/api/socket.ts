@@ -6,7 +6,21 @@ import type { Server as IOServer } from "socket.io";
 import type { NextApiResponse } from "next";
 import { rooms } from "./dataBase";
 import { initialState } from "@/lib/initialState";
-import { RoomState } from "@/lib/types";
+import { Rooms, RoomState } from "@/lib/types";
+
+function leaveRoom(socket: Socket, roomId: string, rooms: Rooms, io: ServerIO) {
+  socket.leave(roomId);
+
+  const room = rooms[roomId];
+  if (!room) return;
+
+  const index = room.visitors.indexOf(socket.id);
+  if (index !== -1) {
+    delete room.visitors[index];
+    console.log(`Socket ${socket.id} left ${roomId}`);
+    io.to(roomId).emit("room update", room.visitors);
+  }
+}
 
 export type NextApiResponseServerIO = NextApiResponse & {
   socket: {
@@ -48,7 +62,7 @@ export default function handler(
         if (!room) {
           rooms[roomId] = {visitors: [], state: initialState}; // create room
           room = rooms[roomId];
-        };  
+        };
 
         if (!room.visitors[0]) {
           room.visitors[0] = socket.id; // set first player
@@ -57,14 +71,18 @@ export default function handler(
         } else {
           room.visitors.push(socket.id); // set visitor
         };
+
         console.log(`Socket ${socket.id} joined ${roomId}`);
         io.to(roomId).emit("room update", room.visitors);
+        io.emit("rooms update", rooms);
       });
 
       socket.on("get room", (roomId: string, callback) => {
         const room = rooms[roomId] || [];
         callback(room);
       });
+
+      socket.on("get rooms", callback => callback(rooms));
 
       socket.on("roll dice", (roomId) => {
         const d1 = Math.ceil(Math.random() * 6);
@@ -81,16 +99,17 @@ export default function handler(
         io.to(roomId).emit("state updated", rooms[roomId].state);
       });
 
+      socket.on("leave", (roomId: string) => {
+        leaveRoom(socket, roomId, rooms, io);
+        io.emit("rooms update", rooms);
+      });
+
       socket.on("disconnect", () => {
-        Object.entries(rooms).forEach(([roomId, room]) => {
-          const index = room.visitors.indexOf(socket.id);
-          
-          if (index !== -1) {
-            delete room.visitors[index];
-            console.log(`Socket ${socket.id} left ${roomId}`);
-            io.to(roomId).emit("room update", room.visitors);
-          };
+        Object.keys(rooms).forEach(roomId => {
+          leaveRoom(socket, roomId, rooms, io);
         })
+
+        io.emit("rooms update", rooms);
         console.log("❌ Socket disconnected:", socket.id);
       });
     });

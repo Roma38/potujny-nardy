@@ -19,3 +19,5 @@ export type Room = {
   visitors: string[];
   state: RoomState;
 };
+
+export type Rooms = Record<string, Room>;
