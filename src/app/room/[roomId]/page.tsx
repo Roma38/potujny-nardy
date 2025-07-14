@@ -13,21 +13,19 @@ import { Room, RoomState } from "@/lib/types";
 
 export default function GameRoom() {
   const [roomUsers, setRoomUsers] = useState <string[]>([]);
-  const { state, onPointClick, rollDice, bearOff, resetState, setDice } = useGame();
+  const { state, onPointClick, rollDice, bearOff, updateState, setDice } = useGame();
   const { roomId }: { roomId: string } = useParams()!;
   
   useEffect(() => {
     socket.emit("get room", roomId, (room: Room) => {
       console.log({ room });
       setRoomUsers(room.visitors);
-      resetState({ ...room.state, selectedPoint: null });
+      updateState({ ...room.state, selectedPoint: null });
     });
 
-    socket.on("room update", (room) => {
-      setRoomUsers(room);
-    })
-
+    socket.on("room update", (room) => setRoomUsers(room))
     socket.on("dice update", (dice: RoomState["dice"]) => setDice(dice));
+    socket.on("state updated", state => updateState({ ...state, selectedPoint: null }));
 
     return () => {
       socket.off();
@@ -38,7 +36,6 @@ export default function GameRoom() {
   const playerColor = white === socket.id ? 'white' 
     : black === socket.id ? 'black' : null;
   const isUsersTurn = playerColor === state.currentPlayer;
-  console.log({ playerColor, isUsersTurn, audience })
   
   return (
     <div className={`grow ${isUsersTurn ? "" : "pointer-events-none"}`}>

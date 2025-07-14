@@ -1,4 +1,4 @@
-import { GameState } from "@/hooks/useGame";
+import { GameState } from "@/state/reducer";
 
 type Props = {
   borneOff: GameState['borneOff'];

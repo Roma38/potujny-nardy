@@ -1,19 +1,21 @@
 "use client";
 
 import { useEffect, useReducer } from "react";
+import { useParams } from "next/navigation";
 import { initialState } from "@/lib/initialState";
 import { CHECKERS_AMOUNT } from "@/lib/constants";
 import { Checker, Player } from "@/lib/types";
-import socket from "@/lib/socket";
+import socket, { emitMoveChecker, emitReEnterChecker, emitBearOff ,emitEndTurn, emitGameOver } from "@/lib/socket";
 import { gameReducer, GameState } from "@/state/reducer";
 
 export function useGame() {
   const [state, dispatch] = useReducer(gameReducer, {...initialState, selectedPoint: null});
+  const { roomId }: { roomId: string } = useParams()!;
   
   useEffect(() => {
     if (state.dice.length && !isHaveValidMoves()) {
-      alert(`You have no moves: ${state.dice.toString()}`);
-      dispatch({ type: "END_TURN" });
+      alert(`${state.currentPlayer} has no moves: ${state.dice.toString()}`);
+      emitEndTurn(state, roomId);
     }
   }, [state.board, state.dice]);
 
@@ -42,12 +44,7 @@ export function useGame() {
     if (bar[currentPlayer].length) {
       if (isMoveValid(currentPlayer === 'white' ? 24 : -1, index)) {
         //re-enter a checker from the bar
-        dispatch({
-          type: "RE_ENTER_CHECKER",
-          color: currentPlayer,
-          point: index,
-          isHitBlot: isOpponentsBlotThere(index),
-        });
+        emitReEnterChecker(index, state, roomId);
       }
       return;
     }
@@ -87,16 +84,7 @@ export function useGame() {
       throw new Error("No selectedPoint");
     }
     
-    dispatch({
-      type: "MOVE_CHECKER",
-      from: selectedPoint,
-      to,
-      isHitBlot: isOpponentsBlotThere(to),
-    });
-  }
-
-  function isOpponentsBlotThere(point:number): boolean {
-     return board[point][0] && board[point][0].color !== currentPlayer ? true : false;
+    emitMoveChecker(selectedPoint, to, state, roomId);
   }
 
   function isHaveValidMoves(): boolean {
@@ -150,14 +138,10 @@ export function useGame() {
     const exactDie = currentPlayer === "white" 
       ? selectedPoint + 1 
       : 24 - selectedPoint;
+    const dieIndex = dice.indexOf(exactDie);
 
-    if (dice.indexOf(exactDie) !== -1) {
-      return dispatch({
-        type: "BEAR_OFF",
-        point: selectedPoint,
-        color: currentPlayer,
-        dieIndex: exactDie,
-      });
+    if (dieIndex !== -1) {
+      emitBearOff(selectedPoint, dieIndex, state, roomId);
     }
 
     const prevHomePoints = currentPlayer === "white"
@@ -175,12 +159,7 @@ export function useGame() {
 
     if (biggerThanExactDieIndex !== -1) {
       // if there are a die bigger than exact bear off die
-      return dispatch({
-        type: "BEAR_OFF",
-        point: selectedPoint,
-        color: currentPlayer,
-        dieIndex: biggerThanExactDieIndex,
-      });
+      emitBearOff(selectedPoint, biggerThanExactDieIndex, state, roomId);
     } 
     
     return dispatch({ type: "SELECT_POINT", point: null });
@@ -226,16 +205,15 @@ export function useGame() {
     }
     alert(`${winner} wins with ${points} ${points === 1 ? "point" : "points"}`);
 
-    dispatch({ type: "GAME_OVER", winner, points });
+    emitGameOver(winner, points, state, roomId);
   }
 
   return {
     state,
     rollDice,
-    endTurn: () => dispatch({ type: "END_TURN" }),
     onPointClick,
     bearOff,
     setDice: (dice: number[]) => dispatch({ type: "ROLL_DICE", dice }),
-    resetState: (state: GameState) => dispatch({ type: "RESET_STATE", state }),
+    updateState: (state: Partial<GameState>) => dispatch({ type: "UPDATE_STATE", state }),
   };
 }

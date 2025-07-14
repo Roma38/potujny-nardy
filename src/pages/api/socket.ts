@@ -75,6 +75,12 @@ export default function handler(
         io.to(roomId).emit("dice update", dice);
       });
 
+      socket.on("update state", (state: Partial<RoomState>, roomId: string) => {
+        rooms[roomId].state = { ...rooms[roomId].state, ...state };
+
+        io.to(roomId).emit("state updated", rooms[roomId].state);
+      });
+
       socket.on("disconnect", () => {
         Object.entries(rooms).forEach(([roomId, room]) => {
           const index = room.visitors.indexOf(socket.id);
