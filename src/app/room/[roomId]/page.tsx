@@ -17,11 +17,12 @@ export default function GameRoom() {
   const { roomId }: { roomId: string } = useParams()!;
   
   useEffect(() => {
-    socket.emit("get room", roomId, (room: Room) => {
-      console.log({ room });
-      setRoomUsers(room.visitors);
-      updateState({ ...room.state, selectedPoint: null });
-    });
+    if (!socket.connected) {
+      socket.connect();
+      socket.once("connect", () => joinRoom());
+    } else {
+      joinRoom();
+    }
 
     socket.on("room update", (room) => setRoomUsers(room))
     socket.on("dice update", (dice: RoomState["dice"]) => setDice(dice));
@@ -32,6 +33,13 @@ export default function GameRoom() {
       socket.emit("leave", roomId);
     };
   }, [])
+
+  function joinRoom() {
+    socket.emit("join", roomId, (room: Room) => {
+      setRoomUsers(room.visitors);
+      updateState({ ...room.state, selectedPoint: null });
+    });
+  }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [white, black, ...spectators] = roomUsers;

@@ -63,7 +63,7 @@ export default function handler(
         io.emit("message", msg);
       });
 
-      socket.on("join", (roomId: string) => {
+      socket.on("join", (roomId: string, callback) => {
         socket.join(roomId);
         let room = rooms[roomId];
         if (!room) {
@@ -80,14 +80,15 @@ export default function handler(
         };
 
         console.log(`Socket ${socket.id} joined ${roomId}`);
-        io.to(roomId).emit("room update", room.visitors);
+        socket.to(roomId).emit("room update", room.visitors);
         io.emit("rooms update", rooms);
-      });
-
-      socket.on("get room", (roomId: string, callback) => {
-        const room = rooms[roomId] || [];
         callback(room);
       });
+
+      // socket.on("get room", (roomId: string, callback) => {
+      //   const room = rooms[roomId] || [];
+      //   callback(room);
+      // });
 
       socket.on("get rooms", callback => callback(rooms));
 
