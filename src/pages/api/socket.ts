@@ -13,11 +13,18 @@ function leaveRoom(socket: Socket, roomId: string, rooms: Rooms, io: ServerIO) {
 
   const room = rooms[roomId];
   if (!room) return;
+  const { visitors } = room;
+  const index = visitors.indexOf(socket.id);
 
-  const index = room.visitors.indexOf(socket.id);
   if (index !== -1) {
-    delete room.visitors[index];
+    delete visitors[index];
     console.log(`Socket ${socket.id} left ${roomId}`);
+    // if room is empty
+    if (visitors.every(item => !item)) {
+      console.log(`Room ${roomId} was deleted`)
+      delete rooms[roomId];
+    }
+  
     io.to(roomId).emit("room update", room.visitors);
   }
 }
