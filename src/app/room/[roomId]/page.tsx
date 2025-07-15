@@ -49,8 +49,8 @@ export default function GameRoom() {
   
   return (
     <div className={`grow ${isUsersTurn ? "" : "pointer-events-none"}`}>
-      <div className="flex justify-between w-full">
-        <Score player="white" score={state.score} />
+      <div className="flex justify-between w-full items-center">
+        <Score player="white" score={state.score} isUsersTurn={state.currentPlayer === "white"}/>
 
         <div className="grow">
           <h2 className="text-xl font-bold capitalize text-center">{state.currentPlayer}</h2>
@@ -58,7 +58,7 @@ export default function GameRoom() {
           <BorneOff borneOff={state.borneOff} bearOff={bearOff} />
         </div>
 
-        <Score player="black" score={state.score} />
+        <Score player="black" score={state.score} isUsersTurn={state.currentPlayer === "black"}  />
       </div>
 
       <Board
@@ -67,7 +67,7 @@ export default function GameRoom() {
         onPointClick={onPointClick}
       />
 
-      <Dice dice={state.dice} onRoll={() => rollDice(roomId)} />
+      <Dice dice={state.dice} onRoll={() => rollDice(roomId)} isUsersTurn={isUsersTurn} />
     </div>
   );
 }
