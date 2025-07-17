@@ -19,7 +19,7 @@ export default function RoomCard({ roomId, visitors }: RoomCardProps) {
   const router = useRouter();
 
   return (
-    <div className="bg-zinc-800 rounded-2xl p-4 mb-4 shadow-lg text-white flex flex-col gap-2">
+    <div className="w-[500px] bg-zinc-800 rounded-2xl p-4 mb-4 shadow-lg text-white flex flex-col gap-2 text-center">
       <div className="text-lg font-semibold">Room: <span className="text-amber-400">{roomId}</span></div>
 
       <div className="text-sm text-zinc-300">
