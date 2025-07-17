@@ -12,7 +12,7 @@ type Props = {
 
 export default function Score({ player, score, isUsersTurn, isPlayerConnected }: Props) {
   return (
-    <div className={`w-[100px] pt-2 text-center rounded-xl outline-black ${isUsersTurn ? "outline-4 bg-green-800" : ""}`}>
+    <div className={`relative w-[100px] pt-2 text-center rounded-xl outline-black ${isUsersTurn ? "outline-4 bg-green-800" : ""}`}>
       <div>{player === 'white' ? '⚪ White' : '⚫ Black'}</div>
       <span className="text-7xl">{score[player]}</span>
       {!isPlayerConnected && 
