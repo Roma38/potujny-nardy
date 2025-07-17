@@ -1,4 +1,3 @@
-import socket from "@/lib/socket";
 import { useRouter } from "next/navigation";
 
 interface RoomCardProps {
@@ -19,12 +18,6 @@ function getText(visitors: RoomCardProps['visitors']): string {
 export default function RoomCard({ roomId, visitors }: RoomCardProps) {
   const router = useRouter();
 
-
-  const handleJoin = () => {
-    socket.emit("join", roomId);
-    router.push(`/room/${roomId}`);
-  };
-
   return (
     <div className="bg-zinc-800 rounded-2xl p-4 mb-4 shadow-lg text-white flex flex-col gap-2">
       <div className="text-lg font-semibold">Room: <span className="text-amber-400">{roomId}</span></div>
@@ -34,7 +27,7 @@ export default function RoomCard({ roomId, visitors }: RoomCardProps) {
       </div>
 
       <button
-        onClick={handleJoin}
+        onClick={() => router.push(`/room/${roomId}`)}
         className="mt-3 px-4 py-2 bg-amber-500 hover:bg-amber-600 text-black rounded-md transition"
       >
         { visitors[0] && visitors[1] ? "Watch" : "Join" }
