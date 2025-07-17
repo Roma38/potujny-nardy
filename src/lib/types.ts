@@ -21,3 +21,8 @@ export type Room = {
 };
 
 export type Rooms = Record<string, Room>;
+
+export type Note = {
+  id: string;
+  text: string;
+};

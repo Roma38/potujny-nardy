@@ -7,13 +7,16 @@ import Dice from "@/components/Dice";
 import Bar from "@/components/Bar";
 import BorneOff from "@/components/BorneOff";
 import Score from "@/components/Score";
+import Notifications from "@/components/Notifications";
 import { useGame } from "@/hooks/useGame";
+import { useNotifications } from "@/hooks/useNotifications";
 import socket from "@/lib/socket";
 import { Room, RoomState } from "@/lib/types";
 
 export default function GameRoom() {
   const [roomUsers, setRoomUsers] = useState <string[]>([]);
   const { state, onPointClick, rollDice, bearOff, updateState, setDice } = useGame();
+  const { notifications, visitorsUpdateNote } = useNotifications();
   const { roomId }: { roomId: string } = useParams()!;
   
   useEffect(() => {
@@ -24,7 +27,13 @@ export default function GameRoom() {
       joinRoom();
     }
 
-    socket.on("room update", (room) => setRoomUsers(room))
+    socket.on("room update", (room) => {
+      setRoomUsers(prevRoomUsers => {
+        console.log({ prevRoomUsers, room, notifications });
+        visitorsUpdateNote(prevRoomUsers, room);
+        return room;
+      });
+    });
     socket.on("dice update", (dice: RoomState["dice"]) => setDice(dice));
     socket.on("state updated", state => updateState({ ...state, selectedPoint: null }));
     socket.on("disconnect", reason => console.error("❌ Disconnected from server:", reason));
@@ -36,10 +45,12 @@ export default function GameRoom() {
     return () => {
       socket.off();
       socket.emit("leave", roomId);
+      console.log("UnMOUNT");
     };
   }, [])
 
   function joinRoom() {
+    console.log("Join room ", roomId)
     socket.emit("join", roomId, (room: Room) => {
       setRoomUsers(room.visitors);
       updateState({ ...room.state, selectedPoint: null });
@@ -54,6 +65,7 @@ export default function GameRoom() {
   
   return (
     <div className={`grow ${isUsersTurn ? "" : "pointer-events-none"}`}>
+      <Notifications notifications={notifications}/>
       <div className="flex justify-between w-full items-center">
         <Score 
           player="white" 
