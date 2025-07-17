@@ -35,7 +35,7 @@ export default function Page() {
   return (
     <div className="grow p-4 space-y-4">
       <button
-        onClick={() => router.push(`/room/${socket.id}`)}
+        onClick={() => router.push(`/room/${crypto.randomUUID()}`)}
         className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-black rounded-md transition"
       >
         Create New Room
