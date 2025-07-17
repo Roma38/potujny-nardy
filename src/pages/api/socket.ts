@@ -64,12 +64,20 @@ export default function handler(
       });
 
       socket.on("join", (roomId: string, callback) => {
-        socket.join(roomId);
+        if (typeof callback !== "function") {
+          return console.log("join called. typeof callback:", typeof callback);
+        }
+
         let room = rooms[roomId];
         if (!room) {
           rooms[roomId] = {visitors: [], state: initialState}; // create room
           room = rooms[roomId];
+          console.log(`Room ${roomId} created`);
         };
+        
+        if (room.visitors.includes(socket.id)) {
+          return console.error(`Socket ${socket.id} tried to join the room ${roomId} which he is already in`)
+        }
 
         if (!room.visitors[0]) {
           room.visitors[0] = socket.id; // set first player
@@ -78,7 +86,8 @@ export default function handler(
         } else {
           room.visitors.push(socket.id); // set visitor
         };
-
+        
+        socket.join(roomId);
         console.log(`Socket ${socket.id} joined ${roomId}`);
         socket.to(roomId).emit("room update", room.visitors);
         io.emit("rooms update", rooms);
