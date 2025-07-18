@@ -7,6 +7,7 @@ import type { NextApiResponse } from "next";
 import { rooms } from "./dataBase";
 import { initialState } from "@/lib/initialState";
 import { Rooms, RoomState } from "@/lib/types";
+import { APP_ORIGIN } from "@/lib/constants";
 
 function leaveRoom(socket: Socket, roomId: string, rooms: Rooms, io: ServerIO) {
   socket.leave(roomId);
@@ -50,7 +51,7 @@ export default function handler(
       path: "/api/socket",
       addTrailingSlash: false,
       cors: {
-        origin: "*",
+        origin: APP_ORIGIN,
         methods: ["GET", "POST"],
       },
     });

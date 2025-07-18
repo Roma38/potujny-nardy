@@ -2,8 +2,9 @@ import { GameState } from "@/hooks/gameReducer";
 import { io, Socket } from "socket.io-client";
 import { Player } from "./types";
 import { initialState } from "./initialState";
+import { APP_ORIGIN } from "./constants";
 
-const socket: Socket = io({
+const socket: Socket = io(APP_ORIGIN, {
   path: "/api/socket",
   autoConnect: false,
   transports: ["websocket"],
