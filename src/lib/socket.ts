@@ -7,8 +7,42 @@ import { APP_ORIGIN } from "./constants";
 const socket: Socket = io(APP_ORIGIN, {
   path: "/api/socket",
   autoConnect: false,
-  transports: ["websocket"],
+  transports: ["websocket", "polling"],
+  upgrade: true,
+  timeout: 20000,
+  reconnection: true,
+  reconnectionDelay: 1000,
+  reconnectionAttempts: 5,
+  forceNew: true,
+  // Add query parameters for debugging
+  query: {
+    timestamp: Date.now(),
+  },
 });
+
+// Debugging
+socket.on("connect", () => {
+  console.log("✅ Connected to server:", socket.id);
+  console.log("🚀 Transport:", socket.io.engine.transport.name);
+});
+
+socket.on("connect_error", (error) => {
+  console.error("❌ Connection failed:", error.message);
+  console.error("❌ Error details:", error);
+});
+
+socket.on("disconnect", (reason) => {
+  console.log("❌ Disconnected:", reason);
+});
+
+socket.on("reconnect", (attemptNumber) => {
+  console.log("🔄 Reconnected after", attemptNumber, "attempts");
+});
+
+socket.on("reconnect_error", (error) => {
+  console.error("❌ Reconnection failed:", error);
+});
+//
 
 function hitBlot(point: number, state: GameState): GameState {
   const blot = state.board[point].pop(); // hit blot
