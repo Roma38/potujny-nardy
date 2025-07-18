@@ -64,10 +64,6 @@ export default function handler(
       });
 
       socket.on("join", (roomId: string, callback) => {
-        if (typeof callback !== "function") {
-          return console.log("join called. typeof callback:", typeof callback);
-        }
-
         let room = rooms[roomId];
         if (!room) {
           rooms[roomId] = {visitors: [], state: initialState}; // create room

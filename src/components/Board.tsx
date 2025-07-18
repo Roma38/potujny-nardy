@@ -29,13 +29,13 @@ export default function Board({ board, selectedPoint, onPointClick }: Props) {
       }}
     >
       {/* Top row numbers */}
-      <div className="flex justify-between mb-2 px-1">
+      {/* <div className="flex justify-between mb-2 px-1">
         {Array.from({ length: 12 }).map((_, i) => (
           <div key={i} className={`w-12 text-center text-xs text-gray-200 font-semibold ${i === 5 ? "mr-5" : ""}`}>
             {12 + i}
           </div>
         ))}
-      </div>
+      </div> */}
 
       {/* Top points (12–23) */}
       <div className="flex justify-between mb-6">
@@ -78,13 +78,13 @@ export default function Board({ board, selectedPoint, onPointClick }: Props) {
 
 
       {/* Bottom row numbers */}
-      <div className="flex justify-between mt-2 px-1">
+      {/* <div className="flex justify-between mt-2 px-1">
         {Array.from({ length: 12 }).map((_, i) => (
           <div key={i} className={`w-12 text-center text-xs text-gray-200 font-semibold ${i === 5 ? "mr-5" : ""}`}>
             {11 - i}
           </div>
         ))}
-      </div>
+      </div> */}
     </div>
   );
 }

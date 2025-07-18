@@ -29,7 +29,6 @@ export default function GameRoom() {
 
     socket.on("room update", (room) => {
       setRoomUsers(prevRoomUsers => {
-        console.log({ prevRoomUsers, room, notifications });
         visitorsUpdateNote(prevRoomUsers, room);
         return room;
       });
@@ -45,7 +44,7 @@ export default function GameRoom() {
     return () => {
       socket.off();
       socket.emit("leave", roomId);
-      console.log("UnMOUNT");
+      console.log(`Left room ${roomId}`);
     };
   }, [])
 
