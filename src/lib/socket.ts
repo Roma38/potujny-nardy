@@ -1,4 +1,4 @@
-import { GameState } from "@/state/reducer";
+import { GameState } from "@/hooks/gameReducer";
 import { io, Socket } from "socket.io-client";
 import { Player } from "./types";
 import { initialState } from "./initialState";
@@ -6,6 +6,7 @@ import { initialState } from "./initialState";
 const socket: Socket = io({
   path: "/api/socket",
   autoConnect: false,
+  transports: ["websocket"],
 });
 
 function hitBlot(point: number, state: GameState): GameState {

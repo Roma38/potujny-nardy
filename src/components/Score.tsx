@@ -1,7 +1,7 @@
 'use client';
 
 import { Player } from "@/lib/types";
-import { GameState } from "@/state/reducer";
+import { GameState } from "@/hooks/gameReducer";
 
 type Props = {
   player: Player;
