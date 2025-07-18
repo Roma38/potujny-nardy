@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import socket from "@/lib/socket";
+import socket, { connectSocket } from "@/lib/socket";
 import { Rooms } from "@/lib/types";
 import RoomCard from "@/components/RoomCard";
 
@@ -12,7 +12,7 @@ export default function Page() {
 
   useEffect(() => {
     if (!socket.connected) {
-      socket.connect();
+      connectSocket();
       socket.once("connect", () => {
         console.log("✅ Connected:", socket.id);
         socket.emit("get rooms", (rooms: Rooms) => setRooms(rooms));

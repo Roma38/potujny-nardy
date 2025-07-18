@@ -44,6 +44,21 @@ socket.on("reconnect_error", (error) => {
 });
 //
 
+async function initializeSocketServer() {
+  try {
+    await fetch(`${APP_ORIGIN}/api/socket`);
+    console.log("✅ Socket.IO server initialized");
+  } catch (error) {
+    console.error("❌ Failed to initialize server:", error);
+  }
+}
+
+// Call this before connecting
+export async function connectSocket() {
+  await initializeSocketServer();
+  socket.connect();
+}
+
 function hitBlot(point: number, state: GameState): GameState {
   const blot = state.board[point].pop(); // hit blot
   if (!blot) throw new Error("No checkers in selected point");

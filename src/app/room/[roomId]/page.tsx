@@ -10,7 +10,7 @@ import Score from "@/components/Score";
 import Notifications from "@/components/Notifications";
 import { useGame } from "@/hooks/useGame";
 import { useNotifications } from "@/hooks/useNotifications";
-import socket from "@/lib/socket";
+import socket, { connectSocket } from "@/lib/socket";
 import { Room, RoomState } from "@/lib/types";
 
 export default function GameRoom() {
@@ -21,7 +21,7 @@ export default function GameRoom() {
   
   useEffect(() => {
     if (!socket.connected) {
-      socket.connect();
+      connectSocket();
       socket.once("connect", () => joinRoom());
     } else {
       joinRoom();
