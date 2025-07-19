@@ -35,17 +35,15 @@ export default function GameRoom() {
     });
     socket.on("dice update", (dice: RoomState["dice"]) => setDice(dice));
     socket.on("state updated", state => updateState({ ...state, selectedPoint: null }));
-    socket.on("disconnect", reason => {
-      console.error("❌ Disconnected from server:", reason);
+    socket.on("disconnect", () => {
       pushNote("❌ Connection lost");
     });
     socket.on("reconnect_attempt", () => {
-      console.log("🔄 trying to reconnect...")
       pushNote("Reconnecting...");
     });
-    socket.on("reconnect", (attempt) => {
-      console.log("🔁 reconnected after", attempt, "tries");
+    socket.on("reconnect", () => {
       pushNote("✅ Connection restored");
+      joinRoom();
     });
 
     return () => {

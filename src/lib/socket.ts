@@ -10,14 +10,12 @@ const socket: Socket = io(APP_ORIGIN, {
   transports: ["websocket", "polling"],
   upgrade: true,
   timeout: 20000,
+
   reconnection: true,
-  reconnectionDelay: 1000,
-  reconnectionAttempts: 5,
-  forceNew: true,
-  // Add query parameters for debugging
-  query: {
-    timestamp: Date.now(),
-  },
+  reconnectionAttempts: 18, // About 18 attempts in 3 minutes
+  reconnectionDelay: 2000, // Start with 2 seconds
+  reconnectionDelayMax: 15000, // Max 15 seconds between attempts
+  randomizationFactor: 0.3,
 });
 
 // Debugging
