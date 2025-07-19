@@ -16,7 +16,7 @@ import { Room, RoomState } from "@/lib/types";
 export default function GameRoom() {
   const [roomUsers, setRoomUsers] = useState <string[]>([]);
   const { state, onPointClick, rollDice, bearOff, updateState, setDice } = useGame();
-  const { notifications, visitorsUpdateNote } = useNotifications();
+  const { notifications, visitorsUpdateNote, pushNote } = useNotifications();
   const { roomId }: { roomId: string } = useParams()!;
   
   useEffect(() => {
@@ -35,10 +35,17 @@ export default function GameRoom() {
     });
     socket.on("dice update", (dice: RoomState["dice"]) => setDice(dice));
     socket.on("state updated", state => updateState({ ...state, selectedPoint: null }));
-    socket.on("disconnect", reason => console.error("❌ Disconnected from server:", reason));
-    socket.on("reconnect_attempt", () => console.log("🔄 trying to reconnect..."));
+    socket.on("disconnect", reason => {
+      console.error("❌ Disconnected from server:", reason);
+      pushNote("❌ Connection lost");
+    });
+    socket.on("reconnect_attempt", () => {
+      console.log("🔄 trying to reconnect...")
+      pushNote("Reconnecting...");
+    });
     socket.on("reconnect", (attempt) => {
       console.log("🔁 reconnected after", attempt, "tries");
+      pushNote("✅ Connection restored");
     });
 
     return () => {

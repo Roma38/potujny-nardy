@@ -45,5 +45,10 @@ export function useNotifications() {
     setNotifications((prev) => [...prev, ...newNotes]);
   }
 
-  return { notifications, visitorsUpdateNote };
+  function pushNote(text: string) {
+    const newNote: Note = { id: crypto.randomUUID(), text };
+    setNotifications((prev) => [...prev, newNote]);
+  }
+
+  return { notifications, visitorsUpdateNote, pushNote };
 }
