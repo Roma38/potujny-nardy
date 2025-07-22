@@ -37,8 +37,16 @@ socket.on("reconnect", (attemptNumber) => {
   console.log("🔄 Reconnected after", attemptNumber, "attempts");
 });
 
+socket.on("reconnect_attempt", (attemptNumber) => {
+  console.log("🔄 Reconnection attempt #", attemptNumber);
+});
+
 socket.on("reconnect_error", (error) => {
-  console.error("❌ Reconnection failed:", error);
+  console.log("❌ Reconnection error:", error);
+});
+
+socket.on("reconnect_failed", () => {
+  console.log("💀 Reconnection failed - giving up");
 });
 //
 
