@@ -5,8 +5,9 @@ import { useParams } from "next/navigation";
 import { initialState } from "@/lib/initialState";
 import { CHECKERS_AMOUNT } from "@/lib/constants";
 import { Checker, Player } from "@/lib/types";
-import socket, { emitMoveChecker, emitReEnterChecker, emitBearOff ,emitEndTurn, emitGameOver } from "@/lib/socket";
+import socket from "@/lib/socket";
 import { gameReducer, GameState } from "@/hooks/gameReducer";
+import { emitBearOff, emitEndTurn, emitGameOver, emitMoveChecker, emitReEnterChecker } from "@/hooks/gameActions";
 
 export function useGame() {
   const [state, dispatch] = useReducer(gameReducer, {...initialState, selectedPoint: null});
