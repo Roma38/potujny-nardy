@@ -95,7 +95,6 @@ export default function GameRoom() {
 
         <div className="grow">
           <h2 className="text-xl font-bold capitalize text-center">{state.currentPlayer}</h2>
-          <Bar bar={state.bar} />
           <BorneOff borneOff={state.borneOff} bearOff={bearOff} />
         </div>
 
@@ -111,7 +110,9 @@ export default function GameRoom() {
         board={state.board}
         selectedPoint={state.selectedPoint}
         onPointClick={onPointClick}
-      />
+      >
+        <Bar bar={state.bar} selectedPoint={state.selectedPoint} />
+      </Board>
 
       <Dice dice={state.dice} onRoll={() => rollDice(roomId)} isUsersTurn={isUsersTurn} />
 

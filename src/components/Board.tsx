@@ -1,5 +1,4 @@
-"use client";
-
+import { ReactNode } from "react";
 import { TChecker } from "@/lib/types";
 import Checker from "./Checker";
 
@@ -7,9 +6,10 @@ type Props = {
   board: TChecker[][];
   selectedPoint: number | null;
   onPointClick: (index: number) => void;
+  children: ReactNode;
 };
 
-export default function Board({ board, selectedPoint, onPointClick }: Props) {
+export default function Board({ children, board, selectedPoint, onPointClick }: Props) {
   const renderCheckers = (checkers: TChecker[]) =>
     checkers.map(({color}, i) => (
       <Checker key={i} color={color}/>
@@ -17,20 +17,13 @@ export default function Board({ board, selectedPoint, onPointClick }: Props) {
 
   return (
     <div
-      className="p-6 rounded-lg text-white shadow-xl bg-contain"
+      className="relative p-6 rounded-lg text-white shadow-xl bg-contain"
       style={{
         backgroundImage: "url('https://grizly.club/uploads/posts/2023-01/thumbs/1672792549_grizly-club-p-tekstura-temnogo-dereva-19.jpg')",
       }}
     >
-      {/* Top row numbers */}
-      {/* <div className="flex justify-between mb-2 px-1">
-        {Array.from({ length: 12 }).map((_, i) => (
-          <div key={i} className={`w-12 text-center text-xs text-gray-200 font-semibold ${i === 5 ? "mr-5" : ""}`}>
-            {12 + i}
-          </div>
-        ))}
-      </div> */}
-
+      {/* Bar */}
+      {children}
       {/* Top points (12–23) */}
       <div className="flex justify-between">
         {board.slice(12, 24).map((point, i) => {
@@ -71,16 +64,6 @@ export default function Board({ board, selectedPoint, onPointClick }: Props) {
           );
         })}
       </div>
-
-
-      {/* Bottom row numbers */}
-      {/* <div className="flex justify-between mt-2 px-1">
-        {Array.from({ length: 12 }).map((_, i) => (
-          <div key={i} className={`w-12 text-center text-xs text-gray-200 font-semibold ${i === 5 ? "mr-5" : ""}`}>
-            {11 - i}
-          </div>
-        ))}
-      </div> */}
     </div>
   );
 }
