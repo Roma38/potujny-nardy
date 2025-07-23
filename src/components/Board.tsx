@@ -22,10 +22,9 @@ export default function Board({ board, selectedPoint, onPointClick }: Props) {
 
   return (
     <div
-      className="p-6 rounded-lg text-white shadow-xl"
+      className="p-6 rounded-lg text-white shadow-xl bg-contain"
       style={{
-        backgroundImage: "url('https://www.transparenttextures.com/patterns/wood-pattern.png')",
-        backgroundColor: "#6B4F3A",
+        backgroundImage: "url('https://grizly.club/uploads/posts/2023-01/thumbs/1672792549_grizly-club-p-tekstura-temnogo-dereva-19.jpg')",
       }}
     >
       {/* Top row numbers */}
@@ -38,14 +37,15 @@ export default function Board({ board, selectedPoint, onPointClick }: Props) {
       </div> */}
 
       {/* Top points (12–23) */}
-      <div className="flex justify-between mb-6">
+      <div className="flex justify-between">
         {board.slice(12, 24).map((point, i) => {
           const idx = i + 12;
           return (
             <div
               key={idx}
-              className={`w-12 h-64 flex flex-col items-center border-x border-yellow-100 bg-yellow-100/10 rounded-md cursor-pointer ${selectedPoint === idx ? "ring-2 ring-blue-400" : ""
-                } ${idx === 17 ? "mr-5" : ""}`}
+              className={`w-10 h-64 flex flex-col items-center bg-yellow-100/20 rounded-t-full cursor-pointer 
+                ${selectedPoint === idx ? "bg-gradient-to-b from-amber-500/30" : ""} 
+                ${idx === 17 ? "mr-10" : ""}`}
               onClick={() => onPointClick(idx)}
             >
               <div className="flex flex-col-reverse items-center justify-end h-full gap-y-1 p-1">
@@ -57,14 +57,15 @@ export default function Board({ board, selectedPoint, onPointClick }: Props) {
       </div>
 
       {/* Bottom points (11–0) */}
-      <div className="flex justify-between mt-6">
+      <div className="flex justify-between">
         {board.slice(0, 12).map((_, i) => {
           const idx = 11 - i;
           return (
             <div
               key={idx}
-              className={`w-12 h-64 flex flex-col items-center border-x border-yellow-100 bg-yellow-100/10 rounded-md cursor-pointer ${selectedPoint === idx ? "ring-2 ring-blue-400" : ""
-                } ${idx === 6 ? "mr-5" : ""}`}
+              className={`w-10 h-64 flex flex-col items-center bg-yellow-100/20 rounded-b-full cursor-pointer 
+                ${selectedPoint === idx ? "bg-gradient-to-t from-amber-500/30" : ""} 
+                ${idx === 6 ? "mr-10" : ""}`}
               onClick={() => onPointClick(idx)}
             >
               {/* Align checkers to bottom */}
