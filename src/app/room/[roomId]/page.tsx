@@ -22,7 +22,6 @@ export default function GameRoom() {
   useEffect(() => {
     if (!socket.connected) {
       connectSocket();
-      socket.once("connect", () => joinRoom());
     } else {
       joinRoom();
     }
@@ -35,14 +34,14 @@ export default function GameRoom() {
     });
     socket.on("dice update", (dice: RoomState["dice"]) => setDice(dice));
     socket.on("state updated", state => updateState({ ...state, selectedPoint: null }));
-    socket.on("disconnect", () => {
-      pushNote("❌ Connection lost");
-    });
-    socket.on("reconnect_attempt", () => {
-      pushNote("Reconnecting...");
-    });
+    socket.on("disconnect", () => pushNote("❌ Connection lost"));
+    socket.on("reconnect_attempt", () => pushNote("Reconnecting..."));
     socket.on("reconnect", () => {
       pushNote("✅ Connection restored");
+      joinRoom();
+    });
+    socket.on("connect", () => {
+      pushNote("✅ Connected");
       joinRoom();
     });
 

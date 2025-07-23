@@ -3,7 +3,7 @@ import { APP_ORIGIN } from "./constants";
 
 const socket: Socket = io(APP_ORIGIN, {
   path: "/api/socket",
-  // autoConnect: false,
+  autoConnect: true,
   transports: ["websocket", "polling"],
   upgrade: true,
   timeout: 20000,
