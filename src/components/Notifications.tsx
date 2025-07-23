@@ -1,9 +1,9 @@
 'use client';
 
-import { Note } from "@/lib/types";
+import { TNote } from "@/lib/types";
 
 type Props = {
-  notifications: Note[];
+  notifications: TNote[];
 };
 
 export default function Notifications({ notifications }: Props) {

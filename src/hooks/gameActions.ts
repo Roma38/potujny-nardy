@@ -1,9 +1,9 @@
-import { GameState } from "@/hooks/gameReducer";
+import { TGameState } from "@/hooks/gameReducer";
 import { initialState } from "@/lib/initialState";
 import socket from "@/lib/socket";
-import { Player } from "@/lib/types";
+import { TPlayer } from "@/lib/types";
 
-function hitBlot(point: number, state: GameState): GameState {
+function hitBlot(point: number, state: TGameState): TGameState {
   const blot = state.board[point].pop(); // hit blot
   if (!blot) throw new Error("No checkers in selected point");
   state.bar[blot.color].push(blot); // push blot to bar
@@ -11,20 +11,20 @@ function hitBlot(point: number, state: GameState): GameState {
   return state;
 }
 
-function isOpponentsBlotThere(point: number, state: GameState): boolean {
+function isOpponentsBlotThere(point: number, state: TGameState): boolean {
   const { board, currentPlayer } = state;
   return board[point][0] && board[point][0].color !== currentPlayer
     ? true
     : false;
 }
 
-function changeTurn(state: GameState): GameState {
+function changeTurn(state: TGameState): TGameState {
   state.currentPlayer = state.currentPlayer === "white" ? "black" : "white";
 
   return state;
 }
 
-function removeDie(dieIndex: number, state: GameState): GameState {
+function removeDie(dieIndex: number, state: TGameState): TGameState {
   state.dice.splice(dieIndex, 1);
   if (!state.dice.length) {
     changeTurn(state);
@@ -36,7 +36,7 @@ function removeDie(dieIndex: number, state: GameState): GameState {
 export function emitMoveChecker(
   from: number,
   to: number,
-  state: GameState,
+  state: TGameState,
   roomId: string
 ) {
   const newState = structuredClone(state);
@@ -54,7 +54,7 @@ export function emitMoveChecker(
 
 export function emitReEnterChecker(
   point: number,
-  state: GameState,
+  state: TGameState,
   roomId: string
 ) {
   const newState = structuredClone(state);
@@ -76,7 +76,7 @@ export function emitReEnterChecker(
 export function emitBearOff(
   point: number,
   dieIndex: number,
-  state: GameState,
+  state: TGameState,
   roomId: string
 ) {
   const newState = structuredClone(state);
@@ -86,7 +86,7 @@ export function emitBearOff(
   socket.emit("update state", newState, roomId);
 }
 
-export function emitEndTurn(state: GameState, roomId: string) {
+export function emitEndTurn(state: TGameState, roomId: string) {
   const newState = structuredClone(state);
   changeTurn(newState);
   newState.dice = [];
@@ -94,9 +94,9 @@ export function emitEndTurn(state: GameState, roomId: string) {
 }
 
 export function emitGameOver(
-  winner: Player,
+  winner: TPlayer,
   points: number,
-  state: GameState,
+  state: TGameState,
   roomId: string
 ) {
   const score = structuredClone(state.score);

@@ -1,16 +1,16 @@
-import { Note } from "@/lib/types";
+import { TNote } from "@/lib/types";
 import { useState } from "react";
 
 export function useNotifications() {
-  const [notifications, setNotifications] = useState<Note[]>([]);
+  const [notifications, setNotifications] = useState<TNote[]>([]);
 
   function visitorsUpdateNote(visitors: string[], newVisitors: string[]) {
-    const newNotes: Note[] = [];
+    const newNotes: TNote[] = [];
     newVisitors.forEach((id, index) => {
       if(newVisitors[index] === visitors[index]) return;
       
       if(newVisitors[index] && !visitors[index]) {
-        const note: Note = { id: crypto.randomUUID(), text: "" };
+        const note: TNote = { id: crypto.randomUUID(), text: "" };
 
         switch (index) {
           case 0:
@@ -27,7 +27,7 @@ export function useNotifications() {
       }
 
       if (!newVisitors[index] && visitors[index]) {
-        const note: Note = { id: crypto.randomUUID(), text: "" };
+        const note: TNote = { id: crypto.randomUUID(), text: "" };
         switch (index) {
           case 0:
             note.text = "White disconnected";
@@ -46,7 +46,7 @@ export function useNotifications() {
   }
 
   function pushNote(text: string) {
-    const newNote: Note = { id: crypto.randomUUID(), text };
+    const newNote: TNote = { id: crypto.randomUUID(), text };
     setNotifications((prev) => [...prev, newNote]);
   }
 

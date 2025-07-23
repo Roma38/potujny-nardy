@@ -1,6 +1,6 @@
-import { Board, RoomState } from "./types";
+import { TBoard, TRoomState } from "./types";
 
-export const initialBoard: Board = Array(24)
+export const initialBoard: TBoard = Array(24)
   .fill(null)
   .map(() => []);
 
@@ -13,7 +13,7 @@ initialBoard[16] = Array(3).fill({ color: "black" });
 initialBoard[18] = Array(5).fill({ color: "black" });
 initialBoard[23] = Array(2).fill({ color: "white" });
 
-export const initialState: RoomState = {
+export const initialState: TRoomState = {
   board: initialBoard,
   currentPlayer: "white", // @TODO: implement logic of first move draw
   dice: [],

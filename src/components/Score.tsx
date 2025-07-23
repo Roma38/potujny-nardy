@@ -1,11 +1,11 @@
 'use client';
 
-import { Player } from "@/lib/types";
-import { GameState } from "@/hooks/gameReducer";
+import { TPlayer } from "@/lib/types";
+import { TGameState } from "@/hooks/gameReducer";
 
 type Props = {
-  player: Player;
-  score: GameState['score'];
+  player: TPlayer;
+  score: TGameState['score'];
   isUsersTurn: boolean;
   isPlayerConnected: boolean;
 };

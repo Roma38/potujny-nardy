@@ -12,7 +12,7 @@ import Modal from "@/components/Modal";
 import { useGame } from "@/hooks/useGame";
 import { useNotifications } from "@/hooks/useNotifications";
 import socket, { connectSocket } from "@/lib/socket";
-import { Room, RoomState } from "@/lib/types";
+import { TRoom, TRoomState } from "@/lib/types";
 import { emitEndTurn } from "@/hooks/gameActions";
 
 export default function GameRoom() {
@@ -36,7 +36,7 @@ export default function GameRoom() {
         return room;
       });
     });
-    socket.on("dice update", (dice: RoomState["dice"]) => setDice(dice));
+    socket.on("dice update", (dice: TRoomState["dice"]) => setDice(dice));
     socket.on("state updated", state => updateState({ ...state, selectedPoint: null }));
     socket.on("disconnect", () => pushNote("❌ Connection lost"));
     socket.on("reconnect_attempt", () => pushNote("Reconnecting..."));
@@ -70,7 +70,7 @@ export default function GameRoom() {
 
   function joinRoom() {
     console.log("Join room ", roomId)
-    socket.emit("join", roomId, (room: Room) => {
+    socket.emit("join", roomId, (room: TRoom) => {
       setRoomUsers(room.visitors);
       updateState({ ...room.state, selectedPoint: null });
     });

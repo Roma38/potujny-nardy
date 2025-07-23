@@ -1,7 +1,7 @@
-import { GameState } from "@/hooks/gameReducer";
+import { TGameState } from "@/hooks/gameReducer";
 
 type Props = {
-  borneOff: GameState['borneOff'];
+  borneOff: TGameState['borneOff'];
   bearOff: () => void;
 };
 

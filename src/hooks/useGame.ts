@@ -4,9 +4,9 @@ import { useEffect, useReducer } from "react";
 import { useParams } from "next/navigation";
 import { initialState } from "@/lib/initialState";
 import { CHECKERS_AMOUNT } from "@/lib/constants";
-import { Checker, Player } from "@/lib/types";
+import { TChecker, TPlayer } from "@/lib/types";
 import socket from "@/lib/socket";
-import { gameReducer, GameState } from "@/hooks/gameReducer";
+import { gameReducer, TGameState } from "@/hooks/gameReducer";
 import { emitBearOff, emitGameOver, emitMoveChecker, emitReEnterChecker } from "@/hooks/gameActions";
 
 export function useGame() {
@@ -15,8 +15,8 @@ export function useGame() {
 
   useEffect(() => {
     for (const player in state.borneOff) {
-      if (state.borneOff[player as Player].length === CHECKERS_AMOUNT) {
-        gameOver(player as Player);
+      if (state.borneOff[player as TPlayer].length === CHECKERS_AMOUNT) {
+        gameOver(player as TPlayer);
       }
     }
   }, [state.borneOff]);
@@ -57,7 +57,7 @@ export function useGame() {
   }
 
   function isPointClosed(index: number):boolean {
-    const secondChecker: undefined | Checker = board[index][1];
+    const secondChecker: undefined | TChecker = board[index][1];
     return secondChecker && secondChecker.color !== currentPlayer;
   }
   
@@ -175,8 +175,8 @@ export function useGame() {
     return false;
   }
 
-  function gameOver(winner: Player) {
-    const loser: Player = winner === "white" ? "black" : "white";
+  function gameOver(winner: TPlayer) {
+    const loser: TPlayer = winner === "white" ? "black" : "white";
     let points: number;
     
     const whiteHome = board.slice(0, 6);
@@ -209,6 +209,6 @@ export function useGame() {
     bearOff,
     setDice: (dice: number[]) => dispatch({ type: "ROLL_DICE", dice }),
     isHaveValidMoves,
-    updateState: (state: Partial<GameState>) => dispatch({ type: "UPDATE_STATE", state }),
+    updateState: (state: Partial<TGameState>) => dispatch({ type: "UPDATE_STATE", state }),
   };
 }

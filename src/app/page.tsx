@@ -3,25 +3,25 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import socket, { connectSocket } from "@/lib/socket";
-import { Rooms } from "@/lib/types";
+import { TRooms } from "@/lib/types";
 import RoomCard from "@/components/RoomCard";
 
 export default function Page() {
   const router = useRouter();
-  const [rooms, setRooms] = useState <Rooms>({});
+  const [rooms, setRooms] = useState <TRooms>({});
 
   useEffect(() => {
     if (!socket.connected) {
       connectSocket();
       socket.once("connect", () => {
         console.log("✅ Connected:", socket.id);
-        socket.emit("get rooms", (rooms: Rooms) => setRooms(rooms));
+        socket.emit("get rooms", (rooms: TRooms) => setRooms(rooms));
       });
     } else {
-      socket.emit("get rooms", (rooms: Rooms) => setRooms(rooms));
+      socket.emit("get rooms", (rooms: TRooms) => setRooms(rooms));
     }
 
-    socket.on("rooms update", (rooms: Rooms) => setRooms(rooms));
+    socket.on("rooms update", (rooms: TRooms) => setRooms(rooms));
 
     return () => {
       socket.off();

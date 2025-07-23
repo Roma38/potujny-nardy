@@ -1,28 +1,28 @@
-export type Player = "white" | "black";
+export type TPlayer = "white" | "black";
 
-export type Checker = {
-  color: Player;
+export type TChecker = {
+  color: TPlayer;
 };
 
-export type Board = Checker[][];
+export type TBoard = TChecker[][];
 
-export type RoomState = {
-  board: Board;
-  currentPlayer: Player;
+export type TRoomState = {
+  board: TBoard;
+  currentPlayer: TPlayer;
   dice: number[];
-  bar: { white: Checker[]; black: Checker[] };
-  borneOff: { white: Checker[]; black: Checker[] };
+  bar: { white: TChecker[]; black: TChecker[] };
+  borneOff: { white: TChecker[]; black: TChecker[] };
   score: { white: number; black: number };
 };
 
-export type Room = {
+export type TRoom = {
   visitors: string[];
-  state: RoomState;
+  state: TRoomState;
 };
 
-export type Rooms = Record<string, Room>;
+export type TRooms = Record<string, TRoom>;
 
-export type Note = {
+export type TNote = {
   id: string;
   text: string;
 };

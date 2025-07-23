@@ -6,10 +6,10 @@ import type { Server as IOServer } from "socket.io";
 import type { NextApiResponse } from "next";
 import { rooms } from "./dataBase";
 import { initialState } from "@/lib/initialState";
-import { Rooms, RoomState } from "@/lib/types";
+import { TRooms, TRoomState } from "@/lib/types";
 import { APP_ORIGIN } from "@/lib/constants";
 
-function leaveRoom(socket: Socket, roomId: string, rooms: Rooms, io: ServerIO) {
+function leaveRoom(socket: Socket, roomId: string, rooms: TRooms, io: ServerIO) {
   socket.leave(roomId);
 
   const room = rooms[roomId];
@@ -101,13 +101,13 @@ export default function handler(
       socket.on("roll dice", (roomId) => {
         const d1 = Math.ceil(Math.random() * 6);
         const d2 = Math.ceil(Math.random() * 6);
-        const dice: RoomState["dice"] = d1 === d2 ? [d1, d1, d1, d1] : [d1, d2];
+        const dice: TRoomState["dice"] = d1 === d2 ? [d1, d1, d1, d1] : [d1, d2];
 
         rooms[roomId].state.dice = dice;
         io.to(roomId).emit("dice update", dice);
       });
 
-      socket.on("update state", (state: Partial<RoomState>, roomId: string) => {
+      socket.on("update state", (state: Partial<TRoomState>, roomId: string) => {
         rooms[roomId].state = { ...rooms[roomId].state, ...state };
 
         io.to(roomId).emit("state updated", rooms[roomId].state);

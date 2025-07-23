@@ -1,13 +1,13 @@
-import { RoomState } from "@/lib/types";
+import { TRoomState } from "@/lib/types";
 
-export type GameState = RoomState & { selectedPoint: number | null };
+export type TGameState = TRoomState & { selectedPoint: number | null };
 
-export type GameAction =
+export type TGameAction =
   | { type: "ROLL_DICE"; dice: number[] }
   | { type: "SELECT_POINT"; point: number | null }
-  | { type: "UPDATE_STATE"; state: Partial<GameState> };
+  | { type: "UPDATE_STATE"; state: Partial<TGameState> };
 
-export function gameReducer(state: GameState, action: GameAction): GameState {
+export function gameReducer(state: TGameState, action: TGameAction): TGameState {
   switch (action.type) {
     case "ROLL_DICE":
       return { ...state, dice: action.dice };

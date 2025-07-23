@@ -1,9 +1,8 @@
-"use client";
-
-import { Checker } from "@/lib/types";
+import { TChecker } from "@/lib/types";
+import Checker from "./Checker";
 
 type Props = {
-  bar: { white: Checker[]; black: Checker[] };
+  bar: { white: TChecker[]; black: TChecker[] };
 };
 
 export default function Bar({ bar }: Props) {
@@ -16,15 +15,7 @@ export default function Bar({ bar }: Props) {
         {checkers.length === 0 && (
           <div className="text-gray-400 text-xs italic">No checkers on bar</div>
         )}
-        {checkers.map((checker, i) => (
-          <div
-            key={i}
-            className={`w-7 h-7 rounded-full border shadow-md cursor-pointer ${checker.color === "white"
-                ? "bg-gradient-to-b from-white to-gray-200 border-gray-400"
-                : "bg-gradient-to-b from-gray-900 to-black border-gray-700"
-              }`}
-          />
-        ))}
+        {checkers.map( ({color}, i) => <Checker key={i} color={color} /> )}
       </div>
     </div>
   );
