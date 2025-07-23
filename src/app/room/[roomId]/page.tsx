@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useParams } from "next/navigation";
 import Board from "@/components/Board";
 import Dice from "@/components/Dice";
@@ -8,17 +8,21 @@ import Bar from "@/components/Bar";
 import BorneOff from "@/components/BorneOff";
 import Score from "@/components/Score";
 import Notifications from "@/components/Notifications";
+import Modal from "@/components/Modal";
 import { useGame } from "@/hooks/useGame";
 import { useNotifications } from "@/hooks/useNotifications";
 import socket, { connectSocket } from "@/lib/socket";
 import { Room, RoomState } from "@/lib/types";
+import { emitEndTurn } from "@/hooks/gameActions";
 
 export default function GameRoom() {
   const [roomUsers, setRoomUsers] = useState <string[]>([]);
-  const { state, onPointClick, rollDice, bearOff, updateState, setDice } = useGame();
+  const { state, onPointClick, rollDice, bearOff, updateState, setDice, isHaveValidMoves } = useGame();
   const { notifications, visitorsUpdateNote, pushNote } = useNotifications();
   const { roomId }: { roomId: string } = useParams()!;
-  
+  const modalRef = useRef<HTMLDialogElement>(null);
+  const [modalText, setModalText] = useState(""); 
+
   useEffect(() => {
     if (!socket.connected) {
       connectSocket();
@@ -50,7 +54,19 @@ export default function GameRoom() {
       socket.emit("leave", roomId);
       console.log(`Left room ${roomId}`);
     };
-  }, [])
+  }, []);
+
+  useEffect(() => {
+    if (state.dice.length && !isHaveValidMoves()) {
+      if (isUsersTurn) {
+        setModalText(`You have no moves: ${state.dice.toString()}`);
+        modalRef.current?.addEventListener("close", () => emitEndTurn(state, roomId), { once: true });
+        modalRef.current?.showModal();
+      } else {
+        pushNote(`${state.currentPlayer} has no moves: ${state.dice.toString()}`)
+      }
+    }
+  }, [state.board, state.dice]);
 
   function joinRoom() {
     console.log("Join room ", roomId)
@@ -98,6 +114,8 @@ export default function GameRoom() {
       />
 
       <Dice dice={state.dice} onRoll={() => rollDice(roomId)} isUsersTurn={isUsersTurn} />
+
+      <Modal ref={modalRef}>{modalText}</Modal>
     </div>
   );
 }

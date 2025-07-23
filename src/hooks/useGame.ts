@@ -7,18 +7,11 @@ import { CHECKERS_AMOUNT } from "@/lib/constants";
 import { Checker, Player } from "@/lib/types";
 import socket from "@/lib/socket";
 import { gameReducer, GameState } from "@/hooks/gameReducer";
-import { emitBearOff, emitEndTurn, emitGameOver, emitMoveChecker, emitReEnterChecker } from "@/hooks/gameActions";
+import { emitBearOff, emitGameOver, emitMoveChecker, emitReEnterChecker } from "@/hooks/gameActions";
 
 export function useGame() {
   const [state, dispatch] = useReducer(gameReducer, {...initialState, selectedPoint: null});
   const { roomId }: { roomId: string } = useParams()!;
-  
-  useEffect(() => {
-    if (state.dice.length && !isHaveValidMoves()) {
-      alert(`${state.currentPlayer} has no moves: ${state.dice.toString()}`);
-      emitEndTurn(state, roomId);
-    }
-  }, [state.board, state.dice]);
 
   useEffect(() => {
     for (const player in state.borneOff) {
@@ -215,6 +208,7 @@ export function useGame() {
     onPointClick,
     bearOff,
     setDice: (dice: number[]) => dispatch({ type: "ROLL_DICE", dice }),
+    isHaveValidMoves,
     updateState: (state: Partial<GameState>) => dispatch({ type: "UPDATE_STATE", state }),
   };
 }
