@@ -17,7 +17,7 @@ export default function Board({ children, board, selectedPoint, onPointClick }: 
 
   return (
     <div
-      className="relative p-6 rounded-lg text-white shadow-xl bg-contain"
+      className="relative mt-3 p-6 rounded-lg text-white shadow-xl bg-contain"
       style={{
         backgroundImage: "url('https://grizly.club/uploads/posts/2023-01/thumbs/1672792549_grizly-club-p-tekstura-temnogo-dereva-19.jpg')",
       }}

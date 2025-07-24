@@ -94,7 +94,9 @@ export default function GameRoom() {
         />
 
         <div className="grow">
-          <h2 className="text-xl font-bold capitalize text-center">{state.currentPlayer}</h2>
+          <h2 className="text-xl font-bold capitalize text-center">
+            {isUsersTurn ? "Your move" : `${state.currentPlayer}'s move`}
+          </h2>
           <BorneOff borneOff={state.borneOff} bearOff={bearOff} />
         </div>
 
