@@ -84,7 +84,6 @@ export default function GameRoom() {
   
   return (
     <div className={`scale-70 sm:scale-none grow ${isUsersTurn ? "" : "pointer-events-none"}`}>
-      <Notifications notifications={notifications}/>
       <div className="flex justify-between w-full items-center">
         <Score 
           player="white" 
@@ -117,8 +116,8 @@ export default function GameRoom() {
       </Board>
 
       <Dice dice={state.dice} onRoll={() => rollDice(roomId)} isUsersTurn={isUsersTurn} />
-
       <Modal ref={modalRef}>{modalText}</Modal>
+      <Notifications notifications={notifications} />
     </div>
   );
 }
