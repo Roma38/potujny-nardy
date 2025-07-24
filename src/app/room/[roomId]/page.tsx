@@ -83,7 +83,7 @@ export default function GameRoom() {
   const isUsersTurn = playerColor === state.currentPlayer;
   
   return (
-    <div className={`grow ${isUsersTurn ? "" : "pointer-events-none"}`}>
+    <div className={`scale-70 sm:scale-none grow ${isUsersTurn ? "" : "pointer-events-none"}`}>
       <Notifications notifications={notifications}/>
       <div className="flex justify-between w-full items-center">
         <Score 

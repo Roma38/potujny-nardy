@@ -1,5 +1,3 @@
-'use client';
-
 import { TNote } from "@/lib/types";
 
 type Props = {
